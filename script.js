@@ -8,7 +8,7 @@ const addBtn = document.getElementById("add-btn");
 const todoList = document.getElementById("todo-list");
 
 
-let todos = [];
+let todos = JSON.parse(localStorage.getItem("todos")) || [];
 // addTodo()
 // renderTodos()
 // deleteTodo()
@@ -16,36 +16,71 @@ let todos = [];
 // saveToLocalStorage()
 // loadFromLocalStorage()
 
+function saveToLocalStorage() {
+    localStorage.setItem("todos", JSON.stringify(todos));
+}
+
+function loadFromLocalStorage() {
+    const storeTodos = localStorage.getItem("todos");
+
+
+    if(storeTodos) {
+        todos = JSON.parse(storeTodos);
+    }
+}
 
 function addTodo() {
     const taskText = inputTask.value.trim();
     if(!taskText) return;
     inputTask.value = "";
     todos.push(taskText);
-    renderTodos();
-}
+
+    saveToLocalStorage(); //save data
+    renderTodos();  //update data
+ }
 
 
 function renderTodos() {
-    todoList.textContent = "";
+    todoList.innerHTML = "";
 
-    todos.forEach(function(todo) {
+    todos.forEach(function(todo,index) {
         const li = document.createElement("li");
         li.textContent = todo;
-        todoList.appendChild(li);
-    });
-}
-addBtn.addEventListener("click", addTodo);
 
-function deleteTodo() {
+        // Edit operation :
+
+        const editBtn = document.createElement("button");
+        editBtn.textContent = "Edit";
+
+        editBtn.addEventListener("click", function(){
+       const newValue = prompt("Edit task", todo);
+       const cleanedValue = newValue.trim();
+
+       if (!newValue) return;
+       todos[index] = newValue;
+            saveToLocalStorage();
+            renderTodos();
+        })
+
+
     const deleteBtn = document.createElement("button")
     deleteBtn.textContent = "Delete";
 
-    deleteTodo.addEventListener("click", function(){
-    todos.splice(index,1);
-    renderTodos();
-})
-    li.appendChild(deleteBtn)
+    deleteBtn.addEventListener("click", function(){
+        todos.splice(index,1);
+
+        saveToLocalStorage();
+        renderTodos();
+    })
+
+    li.appendChild(editBtn)
+     li.appendChild(deleteBtn)
     todoList.appendChild(li);
 
+    });
 }
+
+addBtn.addEventListener("click", addTodo);
+
+loadFromLocalStorage();
+renderTodos();
